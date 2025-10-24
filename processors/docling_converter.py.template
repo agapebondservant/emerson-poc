@@ -1,0 +1,50 @@
+from docling.document_converter import DocumentConverter
+
+pdf_source = _input.json.fileName
+
+converter = DocumentConverter()
+
+result = converter.convert(pdf_source)
+
+markdown_output = result.document.export_to_markdown()
+
+from docling.document_converter import DocumentConverter
+
+pdf_source = '{{ $json.Key }}'
+
+converter = DocumentConverter()
+
+result = converter.convert(pdf_source)
+
+markdown_output = result.document.export_to_markdown()
+
+print(markdown_output[:1000])
+
+
+##
+#ls /opt/venv/lib/python3.12/site-packages
+pip install pydantic
+
+PYTHONPATH='/opt/venv/lib/python3.12/site-packages' python3 - <<EOF
+
+import sys
+import os
+
+sys.path.insert(0,'/opt/venv/lib/python3.12/site-packages')
+
+#print(sys.path)
+
+from docling.document_converter import DocumentConverter
+
+pdf_source = '{{ $json.Key }}'
+
+converter = DocumentConverter()
+
+result = converter.convert(pdf_source)
+
+markdown_output = result.document.export_to_markdown()
+
+print(markdown_output[:1000])
+
+EOF
+
