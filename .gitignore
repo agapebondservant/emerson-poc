@@ -1,2 +1,8 @@
 .env
 apps/
+scratch/
+old/
+secret.yaml
+users.htpasswd
+repomix/
+dcgm-exporter-dashboard.json
