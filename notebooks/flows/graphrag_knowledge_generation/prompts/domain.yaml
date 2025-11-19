@@ -4,6 +4,14 @@
 
 - role: user
   content: |
+    Here is a code snippet and some context:
+
+    Code:
+    {{code}}
+    
+    Context:
+    {{markdown}}
+    
     Your task is to analyze this code snippet and generate an outline of the domain model associated with this code.
     
     Instructions:
@@ -12,15 +20,4 @@
     3. If the provided snippet does not appear to be a valid code snippet, say THIS IS NOT VALID CODE.
     4. Include the current state of the domain objects based on information extracted from the code.
 
-    Structure your response as follows:
-    ### Code:
-    [Code snippet]
-
-    ### Domain Model:
-    [Domain Model]
-
-    Code:
-    {{code}}
-    
-    Domain Model:
-    {{domain}}
+    Domain:

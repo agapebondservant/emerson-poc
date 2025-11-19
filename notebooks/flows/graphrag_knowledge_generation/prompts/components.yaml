@@ -4,6 +4,14 @@
 
 - role: user
   content: |
+    Here is a code snippet and some context:
+
+    Code:
+    {{code}}
+    
+    Context:
+    {{markdown}}
+    
     Your task is to analyze this ColdFusion code snippet and generate a specification of all the components you can find, 
     such as CFML tags, Custom tags, User-Defined Functions, Variables, Data Sources, etc.
     
@@ -12,10 +20,6 @@
     2. **Format your response clearly and concisely** using a numbered list.
     3. If the provided snippet does not appear to be a valid code snippet, say THIS IS NOT VALID CODE.
     4. If you cannot find any relevant components for a section, say NO RELEVANT COMPONENTS FOUND.
-
-    Structure your response as follows:
-    ### Code:
-    [Code snippet]
 
     ### Components:
     * **CFML Tags**: 
@@ -29,8 +33,4 @@
     * **Data Sources**:
     [Data Sources]
 
-    Code:
-    {{code}}
-    
     Components:
-    {{components}}
