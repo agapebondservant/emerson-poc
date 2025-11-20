@@ -1,0 +1,370 @@
+---
+# Source: n8n/templates/pdb.yaml
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: n8n-workflows
+  labels:
+    helm.sh/chart: n8n-1.15.14
+    app.kubernetes.io/name: n8n
+    app.kubernetes.io/instance: n8n-workflows
+    app.kubernetes.io/version: "1.114.4"
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/component: main
+    app.kubernetes.io/part-of: n8n
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: n8n
+      app.kubernetes.io/instance: n8n-workflows
+---
+# Source: n8n/templates/serviceaccount.yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: n8n-workflows
+  labels:
+    helm.sh/chart: n8n-1.15.14
+    app.kubernetes.io/name: n8n
+    app.kubernetes.io/instance: n8n-workflows
+    app.kubernetes.io/version: "1.114.4"
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/component: main
+    app.kubernetes.io/part-of: n8n
+automountServiceAccountToken: true
+---
+# Source: n8n/templates/secret.yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: n8n-workflows-encryption-key-secret-v2
+  namespace: n8n
+  labels:
+    app: n8n
+    chart: n8n-1.15.14
+    release: n8n-workflows
+    heritage: Helm
+    app.kubernetes.io/managed-by: Helm
+  annotations:
+    meta.helm.sh/release-name: n8n-workflows
+    meta.helm.sh/release-namespace: n8n
+type: Opaque
+data:
+  N8N_ENCRYPTION_KEY: "Mjk5MGU0YTdhOTUyMWVlMjBhZGNmOTljODExYWVjNTI="
+---
+# Source: n8n/templates/configmap.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: n8n-workflows-database-configmap
+  labels:
+    app: n8n
+    chart: n8n-1.15.14
+    release: n8n-workflows
+    heritage: Helm
+data:
+  DB_TYPE: sqlite
+  DB_SQLITE_VACUUM_ON_STARTUP: "false"
+---
+# Source: n8n/templates/configmap.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: n8n-workflows-logging-configmap
+  labels:
+    app: n8n
+    chart: n8n-1.15.14
+    release: n8n-workflows
+    heritage: Helm
+data:
+  N8N_LOG_LEVEL: "info"
+  N8N_LOG_OUTPUT: "console"
+---
+# Source: n8n/templates/configmap.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: n8n-workflows-diagnostics-configmap
+  labels:
+    app: n8n
+    chart: n8n-1.15.14
+    release: n8n-workflows
+    heritage: Helm
+data:
+  N8N_DIAGNOSTICS_ENABLED: "false"
+  N8N_DIAGNOSTICS_CONFIG_FRONTEND: ""
+  N8N_DIAGNOSTICS_CONFIG_BACKEND: ""
+  N8N_DIAGNOSTICS_POSTHOG_API_KEY: ""
+  N8N_DIAGNOSTICS_POSTHOG_API_HOST: ""
+  N8N_SENTRY_DSN: ""
+  N8N_FRONTEND_SENTRY_DSN: ""
+---
+# Source: n8n/templates/configmap.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: n8n-workflows-version-notifications-configmap
+  labels:
+    app: n8n
+    chart: n8n-1.15.14
+    release: n8n-workflows
+    heritage: Helm
+data:
+  N8N_VERSION_NOTIFICATIONS_ENABLED: "false"
+---
+# Source: n8n/templates/configmap.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: n8n-workflows-public-api-configmap
+  labels:
+    app: n8n
+    chart: n8n-1.15.14
+    release: n8n-workflows
+    heritage: Helm
+data:
+  N8N_PUBLIC_API_DISABLED: "false"
+  N8N_PUBLIC_API_ENDPOINT: "api"
+  N8N_PUBLIC_API_SWAGGERUI_DISABLED: "false"
+---
+# Source: n8n/templates/configmap.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: n8n-workflows-workflow-history-configmap
+  labels:
+    app: n8n
+    chart: n8n-1.15.14
+    release: n8n-workflows
+    heritage: Helm
+data:
+  N8N_WORKFLOW_HISTORY_ENABLED: "true"
+  N8N_WORKFLOW_HISTORY_PRUNE_TIME: "336"
+---
+# Source: n8n/templates/configmap.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: n8n-workflows-task-broker-configmap
+  labels:
+    app: n8n
+    chart: n8n-1.15.14
+    release: n8n-workflows
+    heritage: Helm
+data:
+  N8N_RUNNERS_ENABLED: "true"
+  N8N_RUNNERS_MODE: "external"
+  N8N_RUNNERS_TASK_TIMEOUT: "60"
+  N8N_RUNNERS_HEARTBEAT_INTERVAL: "30"
+  N8N_RUNNERS_MAX_CONCURRENCY: "5"
+  N8N_RUNNERS_STDLIB_ALLOW: "*"
+  N8N_RUNNERS_EXTERNAL_ALLOW: "*"
+  N8N_NATIVE_PYTHON_RUNNER: "true"
+  N8N_RUNNERS_AUTH_TOKEN: "runner123"
+---
+# Source: n8n/templates/configmap.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: n8n-workflows-metrics-configmap
+  labels:
+    app: n8n
+    chart: n8n-1.15.14
+    release: n8n-workflows
+    heritage: Helm
+data:
+  N8N_METRICS: "false"
+  N8N_METRICS_PREFIX: "n8n_"
+  N8N_METRICS_INCLUDE_DEFAULT_METRICS: "true"
+  N8N_METRICS_INCLUDE_CACHE_METRICS: "false"
+  N8N_METRICS_INCLUDE_MESSAGE_EVENT_BUS_METRICS: "false"
+  N8N_METRICS_INCLUDE_WORKFLOW_ID_LABEL: "false"
+  N8N_METRICS_INCLUDE_NODE_TYPE_LABEL: "false"
+  N8N_METRICS_INCLUDE_CREDENTIAL_TYPE_LABEL: "false"
+  N8N_METRICS_INCLUDE_API_ENDPOINTS: "false"
+  N8N_METRICS_INCLUDE_API_PATH_LABEL: "false"
+  N8N_METRICS_INCLUDE_API_METHOD_LABEL: "false"
+  N8N_METRICS_INCLUDE_API_STATUS_CODE_LABEL: "false"
+  N8N_METRICS_INCLUDE_QUEUE_METRICS: "false"
+---
+# Source: n8n/templates/configmap.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: n8n-workflows-binary-data-configmap
+  labels:
+    app: n8n
+    chart: n8n-1.15.14
+    release: n8n-workflows
+    heritage: Helm
+data:
+  N8N_DEFAULT_BINARY_DATA_MODE: "default"
+---
+# Source: n8n/templates/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: n8n-workflows
+  labels:
+    helm.sh/chart: n8n-1.15.14
+    app.kubernetes.io/name: n8n
+    app.kubernetes.io/instance: n8n-workflows
+    app.kubernetes.io/version: "1.114.4"
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/component: main
+    app.kubernetes.io/part-of: n8n
+spec:
+  type: ClusterIP
+  ports:
+    - port: 5678
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    app.kubernetes.io/name: n8n
+    app.kubernetes.io/instance: n8n-workflows
+---
+# Source: n8n/templates/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: n8n-workflows
+  labels:
+    helm.sh/chart: n8n-1.15.14
+    app.kubernetes.io/name: n8n
+    app.kubernetes.io/instance: n8n-workflows
+    app.kubernetes.io/version: "1.114.4"
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/component: main
+    app.kubernetes.io/part-of: n8n
+spec:
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 25%
+      maxSurge: 25%
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: n8n
+      app.kubernetes.io/instance: n8n-workflows
+  template:
+    metadata:
+      annotations:
+        checksum/config: ea3dee2f9a7981682f308b9732de2487fa8aaa2f0eb447253f9b5230638c29c1
+      labels:
+        helm.sh/chart: n8n-1.15.14
+        app.kubernetes.io/name: n8n
+        app.kubernetes.io/instance: n8n-workflows
+        app.kubernetes.io/version: "1.114.4"
+        app.kubernetes.io/managed-by: Helm
+        app.kubernetes.io/component: main
+        app.kubernetes.io/part-of: n8n
+    spec:
+      serviceAccountName: n8n-workflows
+      securityContext:
+        fsGroup: 1000
+        fsGroupChangePolicy: OnRootMismatch
+      containers:
+        - name: n8n-main
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+            privileged: false
+            readOnlyRootFilesystem: false
+            runAsGroup: 1000
+            runAsNonRoot: true
+            runAsUser: 1000
+          image: "quay.io/oawofolurh/n8n-workflows:v8"
+          imagePullPolicy: Always
+          ports:
+            - name: http
+              containerPort: 5678
+              protocol: TCP
+            - name: http2
+              containerPort: 5679
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+          readinessProbe:
+            httpGet:
+              path: /healthz/readiness
+              port: http
+          resources:
+             requests:
+               cpu: 100m
+               memory: 8Gi
+          env:
+            - name: N8N_SECURE_COOKIE
+              value: "false"
+            - name: N8N_HIRING_BANNER_ENABLED
+              value: "false"
+            - name: NODE_ENV
+              value: production
+            - name: N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS
+              value: "true"
+            - name: N8N_PORT
+              value: "5678"
+            - name: N8N_DEFAULT_LOCALE
+              value: "en"
+            - name: GENERIC_TIMEZONE
+              value: "Europe/Berlin"
+            - name: N8N_GRACEFUL_SHUTDOWN_TIMEOUT
+              value: "30"
+            - name: N8N_DISABLE_UI_SECURITY
+              value: "true"
+          envFrom:
+            - configMapRef:
+                name: n8n-workflows-database-configmap
+            - configMapRef:
+                name: n8n-workflows-logging-configmap
+            - configMapRef:
+                name: n8n-workflows-diagnostics-configmap
+            - configMapRef:
+                name: n8n-workflows-version-notifications-configmap
+            - configMapRef:
+                name: n8n-workflows-public-api-configmap
+            - configMapRef:
+                name: n8n-workflows-workflow-history-configmap
+            - configMapRef:
+                name: n8n-workflows-task-broker-configmap
+            - configMapRef:
+                name: n8n-workflows-metrics-configmap
+            - configMapRef:
+                name: n8n-workflows-binary-data-configmap
+            - secretRef:
+                name: n8n-workflows-encryption-key-secret-v2
+          volumeMounts:
+            - mountPath: /home/node/.n8n
+              name: n8n-storage
+        - name: n8n-task-runner
+          image: "quay.io/oawofolurh/n8n-runners:v8"
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+            privileged: false
+            readOnlyRootFilesystem: false
+            runAsGroup: 1000
+            runAsNonRoot: true
+            runAsUser: 1000
+          resources:
+             requests:
+               cpu: 100m
+               memory: 8Gi
+          env:
+            - name: N8N_RUNNERS_TASK_BROKER_URI
+              value: "http://n8n-main:5679"
+          envFrom:
+            - configMapRef:
+                name: n8n-workflows-task-broker-configmap
+      volumes:
+        - name: n8n-storage
+          persistentVolumeClaim:
+            claimName: n8n-pvc
