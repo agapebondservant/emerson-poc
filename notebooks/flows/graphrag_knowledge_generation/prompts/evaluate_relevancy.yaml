@@ -1,0 +1,27 @@
+- role: system
+  content: You are a very knowledgeable software engineer that will faithfully assist the user with their task.
+
+- role: user
+  content: |
+    Here is a code snippet, some context for the code, and a response:
+    
+    **Code:
+    {{code}}
+    **Context:
+    {{markdown}}:
+
+    Response:
+    **{{summary_type}}:
+    {{summary}}
+    
+    Your task is to evaluate the content provided, which includes a response discussing an aspect of the code (components, domain model, summary, topics, etc). Please review the content and assess the relevance of the response provided to the code snippet.
+
+    Assign a score of 1 if the response is relevant to the code, and 0 if it does not.
+
+    Use the followig format:
+
+    [Start of Score]
+    <score>
+    [End of Score]
+
+    Return the final score between [Start of Score] and [End of Score] tags.

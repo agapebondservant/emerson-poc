@@ -1,0 +1,286 @@
+metadata:
+  id: graph-rag-123
+  name: "Knowledge Generation Flow for Graph RAG"
+  description: "(DRAFT) Generates prompt-completion pairs from input documents that can be treated as entity-child pairs in a GraphRAG knowledge graph"
+  version: "1.0.0"
+  author: "Omotola Awofolu"
+
+  recommended_models:
+    default: "meta-llama/Llama-3.3-70B-Instruct"
+    compatible: ["microsoft/phi-4", "mistralai/Mixtral-8x7B-Instruct-v0.1"]
+    experimental: []
+
+  tags:
+    - "knowledge-extraction"
+    - "qa-pairs"
+    - "document-processing"
+    - "rag"
+
+  license: "Apache-2.0"
+
+  dataset_requirements:
+    required_columns:
+      - code_id
+      - markdown
+      - code
+    description: "Input dataset should contain documents with code-text completion pairs."
+
+  output_columns:
+  - summary
+  - summary_type
+  - eval_summary_relevance
+  - eval_summary_faithfulness
+
+blocks:
+
+  - block_type: PromptBuilderBlock
+    block_config:
+      block_name: code_to_summary_prompt
+      input_cols: 
+      - code
+      - markdown
+      output_cols: code_summary_prompt
+      prompt_config_path: prompts/summary.yaml
+      format_as_messages: true
+
+  - block_type: LLMChatBlock
+    block_config:
+      block_name: generate_code_to_summary
+      input_cols: code_summary_prompt
+      output_cols: code_summary_raw
+      max_tokens: 2048
+      async_mode: true
+      n: 2
+
+  - block_type: LLMParserBlock
+    block_config:
+      block_name: extract_code_to_summary
+      input_cols: code_summary_raw
+      extract_content: true
+
+  - block_type: TextParserBlock
+    block_config:
+      block_name: extract_code_to_summary_text
+      input_cols: extract_code_to_summary_content
+      output_cols: code_summary
+      start_tags: [""]
+      end_tags: [""]
+
+
+  - block_type: PromptBuilderBlock
+    block_config:
+      block_name: code_to_components_prompt
+      input_cols: 
+      - code
+      - markdown
+      output_cols: code_components_prompt
+      prompt_config_path: prompts/components.yaml
+      format_as_messages: true
+
+  - block_type: LLMChatBlock
+    block_config:
+      block_name: generate_code_to_components
+      input_cols: code_components_prompt
+      output_cols: code_components_raw
+      max_tokens: 2048
+      async_mode: true
+      n: 2
+
+  - block_type: LLMParserBlock
+    block_config:
+      block_name: extract_code_to_components
+      input_cols: code_components_raw
+      extract_content: true
+
+  - block_type: TextParserBlock
+    block_config:
+      block_name: extract_code_to_components_text
+      input_cols: extract_code_to_components_content
+      output_cols: code_components
+      start_tags: [""]
+      end_tags: [""]
+
+
+  - block_type: PromptBuilderBlock
+    block_config:
+      block_name: code_to_domain_prompt
+      input_cols: 
+      - code
+      - markdown
+      output_cols: code_domain_prompt
+      prompt_config_path: prompts/domain.yaml
+      format_as_messages: true
+
+  - block_type: LLMChatBlock
+    block_config:
+      block_name: generate_code_to_domain
+      input_cols: code_domain_prompt
+      output_cols: code_domain_raw
+      max_tokens: 2048
+      async_mode: true
+      n: 2
+
+  - block_type: LLMParserBlock
+    block_config:
+      block_name: extract_code_to_domain
+      input_cols: code_domain_raw
+      extract_content: true
+
+  - block_type: TextParserBlock
+    block_config:
+      block_name: extract_code_to_domain_text
+      input_cols: extract_code_to_domain_content
+      output_cols: code_domain
+      start_tags: [""]
+      end_tags: [""]
+      
+  - block_type: PromptBuilderBlock
+    block_config:
+      block_name: code_to_topics_prompt
+      input_cols: 
+      - code
+      - markdown
+      output_cols: code_topics_prompt
+      prompt_config_path: prompts/topics.yaml
+      format_as_messages: true
+
+  - block_type: LLMChatBlock
+    block_config:
+      block_name: generate_code_to_topics
+      input_cols: code_topics_prompt
+      output_cols: code_topics_raw
+      max_tokens: 2048
+      async_mode: true
+      n: 2
+
+  - block_type: LLMParserBlock
+    block_config:
+      block_name: extract_code_to_topics
+      input_cols: code_topics_raw
+      extract_content: true
+
+  - block_type: TextParserBlock
+    block_config:
+      block_name: extract_code_to_topics_text
+      input_cols: extract_code_to_topics_content
+      output_cols: code_topics
+      start_tags: [""]
+      end_tags: [""]
+
+  - block_type: MeltColumnsBlock
+    block_config:
+      block_name: melt_code_to_text_columns
+      input_cols: [code_summary, code_components, code_domain, code_topics]
+      output_cols: [summary, summary_type]
+      
+  - block_type: PromptBuilderBlock
+    block_config:
+      block_name: evaluate_summary_relevance_prompt
+      input_cols: 
+      - code
+      - markdown
+      - summary_type
+      - summary
+      output_cols: eval_summary_relevance_prompt
+      prompt_config_path: prompts/evaluate_relevancy.yaml
+      format_as_messages: true
+
+  - block_type: LLMChatBlock
+    block_config:
+      block_name: generate_summary_relevance
+      input_cols: eval_summary_relevance_prompt
+      output_cols: eval_summary_relevance_raw
+      max_tokens: 2048
+      async_mode: true
+      n: 2
+
+  - block_type: LLMParserBlock
+    block_config:
+      block_name: extract_summary_relevance
+      input_cols: eval_summary_relevance_raw
+      extract_content: true
+
+  - block_type: TextParserBlock
+    block_config:
+      block_name: extract_summary_relevance_text
+      input_cols: extract_summary_relevance_content
+      output_cols: eval_summary_relevance
+      start_tags: ["[Start of Score]"]
+      end_tags: ["[End of Score]"]
+      
+  - block_type: PromptBuilderBlock
+    block_config:
+      block_name: evaluate_summary_faithfulness_prompt
+      input_cols: 
+      - code
+      - markdown
+      - summary_type
+      - summary
+      output_cols: eval_summary_faithfulness_prompt
+      prompt_config_path: prompts/evaluate_faithfulness.yaml
+      format_as_messages: true
+
+  - block_type: LLMChatBlock
+    block_config:
+      block_name: generate_summary_faithfulness
+      input_cols: eval_summary_faithfulness_prompt
+      output_cols: eval_summary_faithfulness_raw
+      max_tokens: 2048
+      async_mode: true
+      n: 2
+
+  - block_type: LLMParserBlock
+    block_config:
+      block_name: extract_summary_faithfulness
+      input_cols: eval_summary_faithfulness_raw
+      extract_content: true
+
+  - block_type: TextParserBlock
+    block_config:
+      block_name: extract_summary_faithfulness_text
+      input_cols: extract_summary_faithfulness_content
+      output_cols: eval_summary_faithfulness
+      start_tags: ["[Start of Score]"]
+      end_tags: ["[End of Score]"]
+
+      
+  - block_type: ColumnValueFilterBlock
+    block_config:
+      block_name: validate_code_to_text_filter
+      input_cols:
+        - eval_summary_relevance
+        - eval_summary_faithfulness
+      filter_value: "1"
+      operation: eq
+      
+  - block_type: ColumnValueFilterBlock
+    block_config:
+      block_name: validate_code_to_summary_filter
+      input_cols:
+        - summary
+      filter_value: 
+        - "THIS IS NOT VALID CODE"
+        - "THIS IS NOT VALID CODE."
+      operation: ne
+      
+  - block_type: TextConcatBlock
+    block_config:
+      block_name: aggregate_temp_fields
+      input_cols:
+        - code_summary_prompt
+        - code_summary_raw
+        - extract_code_to_summary_content
+        - code_components_prompt
+        - code_components_raw
+        - extract_code_to_components_content
+        - code_domain_prompt
+        - code_domain_raw
+        - extract_code_to_domain_content
+        - code_topics_prompt
+        - code_topics_raw
+        - extract_code_to_components_content
+        - eval_summary_relevance_prompt
+        - eval_summary_relevance_raw
+        - eval_summary_faithfulness_prompt
+        - eval_summary_faithfulness_raw
+      output_cols: other
