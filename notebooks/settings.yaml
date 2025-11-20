@@ -22,14 +22,14 @@ models:
     # encoding_name: o200k_harmony 
   default_embedding_model:
     type: embedding # or azure_openai_embedding
-    api_base: https://openrouter.ai/api/v1
+    api_base: https://e5-mistral-7b-instruct-demo.apps.cluster-nlx4n.nlx4n.sandbox5538.opentlc.com/v1 #https://openrouter.ai/api/v1
     # api_version: 2024-05-01-preview
     auth_type: api_key # or azure_managed_identity
-    api_key: ${GRAPHRAG_API_KEY}
+    api_key: ${HF_TOKEN} #${GRAPHRAG_API_KEY}
     model_provider: openai
     # audience: "https://cognitiveservices.azure.com/.default"
     # organization: <organization_id>
-    model: text-embedding-3-small
+    model: e5-mistral-7b-instruct
     # deployment_name: <azure_model_deployment_name>
     encoding_model: cl100k_base # automatically set by tiktoken if left undefined
     model_supports_json: true # recommended if this is available for your model.
