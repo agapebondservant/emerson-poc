@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: lancedb-mcp-server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: lancedb-mcp-server
+  template:
+    metadata:
+      labels:
+        app: lancedb-mcp-server
+    spec:
+      containers:
+      - name: mcp-server
+        image: quay.io/oawofolurh/lancedb-mcp-server:v6
+        ports:
+        - containerPort: 8080
+        envFrom:
+        - secretRef:
+            name: mcp-server-secret
+      imagePullSecrets:
+        - name: quay-creds
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: lancedb-mcp-server
+spec:
+  selector:
+    app: lancedb-mcp-server
+  ports:
+  - protocol: TCP
+    containerPort: 8080
+    targetPort: 8080
+    port: 8080
+  type: ClusterIP
+---
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: lancedb-mcp-server
+spec:
+  to:
+    kind: Service
+    name: lancedb-mcp-server
+  port:
+    targetPort: 8080
+  tls:
+    termination: edge
+    insecureEdgeTerminationPolicy: Redirect

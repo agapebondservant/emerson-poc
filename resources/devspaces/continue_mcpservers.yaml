@@ -1,0 +1,7 @@
+name: Code Generation
+version: 0.0.1
+schema: v1
+mcpServers:
+  - name: LanceDB MCP Server
+    type: streamable-http
+    url: https://lancedb-mcp-server-mcpserver.apps.cluster-2gnbb.2gnbb.sandbox2594.opentlc.com/mcp
