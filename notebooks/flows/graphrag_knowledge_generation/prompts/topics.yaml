@@ -16,7 +16,7 @@
     **Instructions:**
     1.  **Provide a short list of the topics that you can find.** The size of the list should not be greater than 5.
     2.  **Format your response clearly and concisely**.
-    3.  If the provided code snippet does not appear to be a valid code snippet, say THIS IS NOT VALID CODE.
+    3.  If the provided code snippet does not include any valid ColdFusion code, say THIS IS NOT VALID CODE.
     4.  Provide a list of topics that could be applied across other programming languages, not just ColdFusion.  
 
     Topics:

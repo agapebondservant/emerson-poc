@@ -17,7 +17,7 @@
     Instructions:
     1. Avoid getting into too many specific technical details. Simply provide a domain model of the code.
     2. **Format your response clearly and concisely** using a numbered list.
-    3. If the provided snippet does not appear to be a valid code snippet, say THIS IS NOT VALID CODE.
+    3. If the provided snippet does not include any valid ColdFusion code, say THIS IS NOT VALID CODE.
     4. Include the current state of the domain objects based on information extracted from the code.
 
     Domain:
