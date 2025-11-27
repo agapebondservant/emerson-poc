@@ -47,8 +47,6 @@ input:
     type: file # or blob
     base_dir: "input"
   file_type: json # [csv, text, json]
-  title_column: summary
-  text_column: code
   
 
 chunks:
