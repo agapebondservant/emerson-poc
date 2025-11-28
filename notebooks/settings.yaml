@@ -9,7 +9,7 @@ models:
     type: chat # or azure_openai_chat
     api_base: https://openrouter.ai/api/v1
     auth_type: api_key
-    api_key: ${GRAPHRAG_API_KEY}
+    api_key: <API-KEY>
     model: openai/gpt-oss-20b
     model_provider: openrouter
     model_supports_json: true
@@ -25,7 +25,7 @@ models:
     api_base: https://e5-mistral-7b-instruct-demo.apps.cluster-nlx4n.nlx4n.sandbox5538.opentlc.com/v1 #https://openrouter.ai/api/v1
     # api_version: 2024-05-01-preview
     auth_type: api_key # or azure_managed_identity
-    api_key: ${HF_TOKEN} #${GRAPHRAG_API_KEY}
+    api_key: <API-KEY>
     model_provider: openai
     # audience: "https://cognitiveservices.azure.com/.default"
     # organization: <organization_id>
@@ -46,7 +46,9 @@ input:
   storage:
     type: file # or blob
     base_dir: "input"
-  file_type: json # [csv, text, json]
+  file_type: "json" # [csv, text, json]
+  # title_column: title
+  # text_column: summary
   
 
 chunks:
