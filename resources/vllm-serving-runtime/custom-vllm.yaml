@@ -1,0 +1,58 @@
+apiVersion: template.openshift.io/v1
+kind: Template
+metadata:
+  annotations:
+    description: "CUSTOM: vLLM ServingRuntime with CUDA support (for NVIDIA GPUs)"
+    opendatahub.io/apiProtocol: REST
+    opendatahub.io/model-type: '["generative"]'
+    opendatahub.io/modelServingSupport: '["single"]'
+    openshift.io/display-name: "CUSTOM: vLLM NVIDIA GPU ServingRuntime for KServe"
+    tags: rhods,rhoai,kserve,servingruntime
+    template.openshift.io/documentation-url: https://github.com/opendatahub-io/vllm
+    template.openshift.io/long-description: This template defines resources needed
+      to deploy vLLM NVIDIA GPU ServingRuntime with KServe in Red Hat OpenShift AI
+  labels:
+    app: odh-dashboard
+    app.kubernetes.io/part-of: odh-model-controller
+    app.opendatahub.io/odh-model-controller: "true"
+    opendatahub.io/dashboard: "true"
+    opendatahub.io/ootb: "true"
+    platform.opendatahub.io/part-of: modelcontroller
+  name: custom-vllm-cuda-runtime-template
+  namespace: redhat-ods-applications
+objects:
+- apiVersion: serving.kserve.io/v1alpha1
+  kind: ServingRuntime
+  metadata:
+    annotations:
+      opendatahub.io/recommended-accelerators: '["nvidia.com/gpu"]'
+      opendatahub.io/runtime-version: v3.2.3
+      openshift.io/display-name: Custom vLLM NVIDIA GPU ServingRuntime for KServe
+    labels:
+      opendatahub.io/dashboard: "true"
+    name: vllm-cuda-runtime
+  spec:
+    annotations:
+      prometheus.io/path: /metrics
+      prometheus.io/port: "8080"
+    containers:
+    - args:
+      - --port=8080
+      - --model=/mnt/models
+      - --served-model-name={{.Name}}
+      command:
+      - python
+      - -m
+      - vllm.entrypoints.openai.api_server
+      env:
+      - name: HF_HOME
+        value: /tmp/hf_home
+      image: registry.redhat.io/rhaiis/vllm-cuda-rhel9:3.2.3
+      name: kserve-container
+      ports:
+      - containerPort: 8080
+        protocol: TCP
+    multiModel: false
+    supportedModelFormats:
+    - autoSelect: true
+      name: vLLM
