@@ -145,6 +145,9 @@ def query_lancedb_graphrag_index(prompt: str,
         The standard output from the subprocess as a string if successful.
     """
     try:
+
+        os.makedirs(root, exist_ok=True)
+
         result = subprocess.run(["graphrag",
                                  "query",
                                  "--root",
