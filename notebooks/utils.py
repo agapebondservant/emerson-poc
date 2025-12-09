@@ -94,6 +94,8 @@ def download_lancedb_index(bucket_name: str,
     """
     print(f"Downloading GraphRAG index from MinIO to {local_lancedb_path}...")
 
+    os.makedirs(local_lancedb_path, exist_ok=True)
+
     try:
 
         client = Minio(
@@ -145,9 +147,6 @@ def query_lancedb_graphrag_index(prompt: str,
         The standard output from the subprocess as a string if successful.
     """
     try:
-
-        os.makedirs(root, exist_ok=True)
-
         result = subprocess.run(["graphrag",
                                  "query",
                                  "--root",
