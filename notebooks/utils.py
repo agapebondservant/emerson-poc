@@ -19,19 +19,18 @@ from minio.error import S3Error
 
 from datasets import load_dataset, Dataset, concatenate_datasets
 
-def postprocess_dataset(generated_jsonl_file: str,
-                        baseline_dataset_name: str,
-                        prompt_dataset_name: str):
+def postprocess_dataset(dataset_name: str,
+                        generated_jsonl_file: str,
+                        ):
     """
     Postprocesses datasets by combining prompt and baseline datasets after applying updates
     to their samples and saves the result as a JSONL file.
 
     Args:
+        dataset_name: Name of the dataset to be processed.
         generated_jsonl_file: Path to save the processed dataset in JSONL
-        baseline_dataset_name: Name or path of the baseline dataset to be processed.
-        prompt_dataset_name: Name or path of the prompt dataset to be processed.
     Returns:
-        Combined dataset after processing and mapping updates.
+        Processed Dataset object.
     """
 
     def update_prompt_sample(sample):
@@ -41,15 +40,11 @@ def postprocess_dataset(generated_jsonl_file: str,
                            f"{sample['summary_type']}\\{sample['summary']}")
         return sample
 
-    prompt_dataset = load_dataset(prompt_dataset_name, split="train").map(update_prompt_sample)
+    dataset = load_dataset(dataset_name, split="train").map(update_prompt_sample)
 
-    baseline_dataset = load_dataset(baseline_dataset_name, split="train").map(update_prompt_sample)
+    dataset.to_json(generated_jsonl_file, orient="records", lines=True)
 
-    combined_dataset = concatenate_datasets([prompt_dataset, baseline_dataset])
-
-    combined_dataset.to_json(generated_jsonl_file, orient="records", lines=True)
-
-    return combined_dataset
+    return dataset
 
 def split_jsonl_into_json_files(source_file: str,
                                 target_dir: str):
