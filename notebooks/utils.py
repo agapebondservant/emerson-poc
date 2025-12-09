@@ -98,6 +98,8 @@ def download_lancedb_index(bucket_name: str,
 
     os.makedirs(local_lancedb_path, exist_ok=True)
 
+    os.makedirs(f"{local_lancedb_path}/output", exist_ok=True)
+
     try:
         ##################################################################
         # Download the GraphRAG index files from the MinIO bucket
@@ -151,7 +153,7 @@ def download_lancedb_index(bucket_name: str,
         )
 
         for table_name in db.table_names():
-            
+
             print(f"Copying table: {table_name}")
 
             table = db.open_table(table_name)
