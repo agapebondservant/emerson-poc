@@ -6,3 +6,5 @@ secret.yaml
 users.htpasswd
 repomix/
 dcgm-exporter-dashboard.json
+wb-secret.yaml
+notebooks/settings.yaml

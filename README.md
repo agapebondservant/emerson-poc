@@ -55,17 +55,30 @@ Then install Dev Spaces: https://docs.redhat.com/en/documentation/red_hat_opensh
 ### 1.2. Set up continue.dev
 
 ### 1.3 Set up custom workbenches
+The following workbenches were used:
+- Custom Agentic Workbench (CrewAI): <a href="https://quay.io/repository/oawofolurh/crewai-wb" target="_blank">Workbench Image</a>
+- Custom GraphRAG Workbench: <a href="https://quay.io/repository/oawofolurh/graphrag-wb" target="_blank">Workbench Image</a>
+
+Use the generated wb-secret.yaml file below to set up the 
+Environment variables for the workbenches (under "Environment Variables" 
+section, select Variable Type -> Upload, then upload the generated file below):
+```
+oc create secret generic data-prep-wb --from-env-file .env
+oc get secret data-prep-wb -oyaml > wb-secret.yaml
+```
 
 ### 1.4 Set up custom ServingRuntime
+```
+oc apply -f resources/vllm-serving-runtime/custom-vllm.yaml
+```
 
 ### 1.5 Deploying IBM Granite 4 (ensure tool calling is enabled: https://www.ibm.com/granite/docs/run/granite-with-vllm-containerized)
 Use the following settings as guidance:
 ```
+# Granite 4 Tiny with Tool Calling
 export VLLM_ALLOW_LONG_MAX_MODEL_LEN=1
-export VLLM_ALLOW_RUNTIME_LORA_UPDATING=True
-export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
 python -m vllm.entrypoints.openai.api_server \
---model granite-4-tiny-version-1 \
+--model=granite-4-tiny-version-1 \
 --dtype=bfloat16 \
 --max-model-len=8192 \
 --trust-remote-code \
@@ -73,6 +86,10 @@ python -m vllm.entrypoints.openai.api_server \
 --tool-call-parser=hermes \
 --enable-auto-tool-choice
 
+# intfloat/e5-mistral-7b-instruct for GraphRAG embedding
+python -m vllm.entrypoints.openai.api_server \
+--model=intfloat/e5-mistral-7b-instruct \
+--task=embed
 ```
 
 ### 1.6. Deploying gpt-oss (or accessing via third party provider)
@@ -113,6 +130,12 @@ oc expose svc n8n-workflows -n n8n
 ```
 
 ### 1.8. Set up LanceDB MCP Server
+```
+set -a
+source .env
+set +a
+envsubst < templates/settings.yaml.in > notebooks/settings.yaml
+```
 
 ### 1.9. Set up Llama Stack
 
