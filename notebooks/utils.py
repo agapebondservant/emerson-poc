@@ -82,7 +82,8 @@ def split_jsonl_into_json_files(source_file: str,
 
 def download_lancedb_index(bucket_name: str,
                            lancedb_db_name: str,
-                           local_lancedb_path: str):
+                           local_lancedb_path: str,
+                           use_https: bool = True):
     """
     Downloads GraphRAG index files from a MinIO bucket and stores them to the
     specified local path.
@@ -91,6 +92,7 @@ def download_lancedb_index(bucket_name: str,
         bucket_name: The name of the MinIO S3 bucket containing the GraphRAG index files.
         lancedb_db_name: The prefix in the S3 bucket where the GraphRAG index files are located.
         local_lancedb_path: The local directory path where the GraphRAG index files will be downloaded and stored.
+        use_https: Whether to use HTTPS for connecting to the MinIO bucket. Defaults to True.
     """
     print(f"Downloading GraphRAG index from MinIO to {local_lancedb_path}...")
 
@@ -106,7 +108,7 @@ def download_lancedb_index(bucket_name: str,
 
             secret_key=os.getenv("AWS_SECRET_ACCESS_KEY"),
 
-            secure=False
+            secure=use_https
         )
 
         objects = client.list_objects(bucket_name, prefix=lancedb_db_name,
