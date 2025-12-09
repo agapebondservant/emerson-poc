@@ -99,7 +99,10 @@ def download_lancedb_index(bucket_name: str,
     os.makedirs(local_lancedb_path, exist_ok=True)
 
     try:
-
+        ##################################################################
+        # Download the GraphRAG index files from the MinIO bucket
+        # and store them locally
+        ##################################################################
         client = Minio(
             os.getenv("AWS_S3_ENDPOINT").removeprefix("https://").removeprefix(
                 "http://"),
@@ -124,6 +127,50 @@ def download_lancedb_index(bucket_name: str,
             os.makedirs(local_subdir, exist_ok=True)
 
             client.fget_object(bucket_name, obj.object_name, local_file_path)
+
+        ##################################################################
+        # Initialize the local Lancedb database with the downloaded index files
+        ##################################################################
+        local_db = lancedb.connect(local_lancedb_path)
+
+        db = lancedb.connect(f"s3://{bucket_name}/{lancedb_db_name}",
+
+             storage_options={
+                 "endpoint_url": os.getenv("AWS_S3_ENDPOINT"),
+
+                 "aws_access_key_id": os.getenv(
+                     "AWS_ACCESS_KEY_ID"),
+
+                 "aws_secret_access_key": os.getenv(
+                     "AWS_SECRET_ACCESS_KEY"),
+
+                 "s3_force_path_style": "true",
+
+                 "allow_http": str(use_https),
+             }
+        )
+
+        for table_name in db.table_names():
+            
+            print(f"Copying table: {table_name}")
+
+            table = db.open_table(table_name)
+
+            data_to_copy = table.to_pandas()
+
+            local_db.create_table(table_name, data=data_to_copy,
+                                  mode="overwrite")
+
+            if isinstance(data_to_copy, pa.Table):
+
+                pq.write_table(data_to_copy,
+                               f"{local_lancedb_path}/output/{table_name}.parquet")
+
+            else:
+                data_to_copy.to_parquet(
+                    f"{local_lancedb_path}/output/{table_name}.parquet")
+
+        print("DB index initialization complete.")
 
     except Exception as e:
 
