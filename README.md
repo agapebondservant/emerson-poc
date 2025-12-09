@@ -63,6 +63,7 @@ Use the generated wb-secret.yaml file below to set up the
 Environment variables for the workbenches (under "Environment Variables" 
 section, select Variable Type -> Upload, then upload the generated file below):
 ```
+oc delete secret data-prep-wb --ignore-not-found
 oc create secret generic data-prep-wb --from-env-file .env
 oc get secret data-prep-wb -oyaml > wb-secret.yaml
 ```

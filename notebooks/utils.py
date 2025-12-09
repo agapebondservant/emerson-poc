@@ -35,10 +35,10 @@ def postprocess_dataset(generated_jsonl_file: str,
     """
 
     def update_prompt_sample(sample):
-        sample["text"] = f"{sample["summary_type"]} for {sample['code_id']}"
+        sample["text"] = f"{sample['summary_type']} for {sample['code_id']}"
 
-        sample["title"] = (f"Code:\n{sample["code"]}\n\n"
-                           f"{sample["summary_type"]}\\{sample['summary']}")
+        sample["title"] = (f"Code:\n{sample['code']}\n\n"
+                           f"{sample['summary_type']}\\{sample['summary']}")
         return sample
 
     prompt_dataset = load_dataset(prompt_dataset_name, split="train").map(update_prompt_sample)
