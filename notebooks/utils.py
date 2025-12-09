@@ -58,18 +58,16 @@ def split_jsonl_into_json_files(source_file: str,
     try:
         with open(source_file, 'r', encoding='utf-8') as infile:
 
-            data = json.load(infile)
+            for idx, line in enumerate(infile):
 
-        if not isinstance(data, list):
+                if line.strip():
 
-            data = [data]
+                    item = json.loads(line.strip())
 
-        for idx, item in enumerate(data):
+                    with (open(f"{target_dir}/{idx}.json", 'w', encoding='utf-8') as
+                          outfile):
 
-            with (open(f"{target_dir}/{idx}.json", 'w', encoding='utf-8') as
-                  outfile):
-
-                outfile.write(json.dumps(item) + '\n')
+                        json.dump(item, outfile)
 
         print(
             f"Successfully converted '{source_file}' to json files under"
@@ -79,6 +77,8 @@ def split_jsonl_into_json_files(source_file: str,
         print(f"An unexpected error occurred while converting {source_file} "
               f"to json files:"
               f": {e}")
+
+        traceback.print_exc()
 
 def download_lancedb_index(bucket_name: str,
                            lancedb_db_name: str,
