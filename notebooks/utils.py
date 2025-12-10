@@ -81,6 +81,109 @@ def split_jsonl_into_json_files(source_file: str,
 
         traceback.print_exc()
 
+def get_lancedb_connection(bucket_name: str,
+                                 lancedb_db_name: str,
+                                 use_https: bool = True):
+    """
+    Establishes an asynchronous connection to a LanceDB database hosted on S3 storage using the provided
+    bucket name and database name.
+
+    Args:
+        bucket_name: The name of the S3-compatible bucket where the LanceDB database is hosted.
+        lancedb_db_name: The name of the LanceDB database inside the S3 bucket.
+        use_https: Whether https is used. Defaults to True.
+    :return: Returns a LanceDB connection object.
+    """
+    db = lancedb.connect(f"s3://{bucket_name}/{lancedb_db_name}",
+
+         storage_options={
+             "endpoint_url": os.getenv("AWS_S3_ENDPOINT"),
+
+             "aws_access_key_id": os.getenv(
+                 "AWS_ACCESS_KEY_ID"),
+
+             "aws_secret_access_key": os.getenv(
+                 "AWS_SECRET_ACCESS_KEY"),
+
+             "s3_force_path_style": "true",
+
+             "allow_http": str(use_https),
+         }
+     )
+
+    return db
+
+def create_or_update_indexing_job(app_name: str,
+                       bucket_name: str,
+                       use_https: bool = True,
+                       results: str = None
+                       ):
+    """
+    Creates or updates an indexing job record in the database.
+
+    Args:
+        app_name: The name of the application for which the indexing job is created or updated.
+        bucket_name: The name of the S3 bucket where the indexing job database is stored.
+        use_https: Boolean flag indicating whether to use HTTPS for the database connection. Defaults to True.
+        results: Optional results of the indexing job to be stored in the database. Defaults to None.
+    """
+    try:
+        db = get_lancedb_connection(bucket_name, "indexing_jobs", use_https)
+
+        data = [
+            {"app_name": app_name, "job_results": results},
+        ]
+
+        table = db.create_table("jobs", data=data, mode="create", exist_ok=True)
+
+        (
+            table.merge_insert("app_name")
+            .when_matched_update_all()
+            .when_not_matched_insert_all()
+            .execute(data)
+        )
+
+    except Exception as e:
+        print(f"Error while creating/updating indexing job for {app_name}:"
+              f": {e}")
+
+        traceback.print_exc()
+
+def fetch_indexing_job(app_name: str,
+                       bucket_name: str,
+                       use_https: bool = True):
+    """
+    Fetches an indexing job for a specified application name from the database.
+
+    Args:
+        app_name: The name of the application for which the indexing job is being retrieved.
+        bucket_name: The name of the database bucket to connect to.
+        use_https: Whether to use HTTPS for the database connection. Defaults to True.
+    Returns:
+        The results of the indexing job as stored in the database,
+        or None if the job is not found or is incomplete.
+    """
+    try:
+        db = get_lancedb_connection(bucket_name, "indexing_jobs", use_https)
+
+        data = [
+            {"app_name": app_name, "job_results": ""},
+        ]
+
+        table = db.create_table("jobs", data=data, mode="create", exist_ok=True)
+
+        results = table.query().where(f"app_name = '{app_name}'").select(
+            "job_results").to_list()
+
+        return results[0][0]
+
+    except Exception as e:
+        print(f"Error while fetching job for {app_name}:"
+              f": {e}")
+
+        traceback.print_exc()
+
+
 def download_lancedb_index(bucket_name: str,
                            lancedb_db_name: str,
                            local_lancedb_path: str,
@@ -136,22 +239,7 @@ def download_lancedb_index(bucket_name: str,
         ##################################################################
         local_db = lancedb.connect(local_lancedb_path)
 
-        db = lancedb.connect(f"s3://{bucket_name}/{lancedb_db_name}",
-
-             storage_options={
-                 "endpoint_url": os.getenv("AWS_S3_ENDPOINT"),
-
-                 "aws_access_key_id": os.getenv(
-                     "AWS_ACCESS_KEY_ID"),
-
-                 "aws_secret_access_key": os.getenv(
-                     "AWS_SECRET_ACCESS_KEY"),
-
-                 "s3_force_path_style": "true",
-
-                 "allow_http": str(use_https),
-             }
-        )
+        db = get_lancedb_connection(bucket_name, lancedb_db_name, use_https)
 
         for table_name in db.table_names():
 
