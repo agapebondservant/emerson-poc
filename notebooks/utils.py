@@ -179,9 +179,13 @@ def fetch_indexing_job(app_name: str,
         table = db.create_table("jobs", data=data, mode="create", exist_ok=True)
 
         results = table.search().where(f"app_name = '{app_name}'").select(
-            "job_results").to_list()
+            ["job_results"]).to_list()
 
-        return results[0][0]
+        if results and "job_results" in results[0]:
+            return results[0]["job_results"]
+
+        else:
+            print("No results found")
 
     except Exception as e:
         print(f"Error while fetching job for {app_name}:"
