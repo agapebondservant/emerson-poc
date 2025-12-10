@@ -128,6 +128,8 @@ def create_or_update_indexing_job(app_name: str,
         results: Optional results of the indexing job to be stored in the database. Defaults to None.
     """
     try:
+        print(f"Setting up index for {app_name}...")
+
         db = get_lancedb_connection(bucket_name, "indexing_jobs", use_https)
 
         data = [
@@ -172,7 +174,7 @@ def fetch_indexing_job(app_name: str,
 
         table = db.create_table("jobs", data=data, mode="create", exist_ok=True)
 
-        results = table.query().where(f"app_name = '{app_name}'").select(
+        results = table.search().where(f"app_name = '{app_name}'").select(
             "job_results").to_list()
 
         return results[0][0]
