@@ -113,27 +113,30 @@ def get_lancedb_connection(bucket_name: str,
 
     return db
 
-def create_or_update_indexing_job(app_name: str,
+def create_or_update_indexing_job(git_repo: str,
                        bucket_name: str,
                        use_https: bool = True,
-                       results: str = None
+                       results: str = None,
+                       git_sha: str = "master"
                        ):
     """
     Creates or updates an indexing job record in the database.
 
     Args:
-        app_name: The name of the application for which the indexing job is created or updated.
+        git_repo: The git repository of the application for which the indexing
+        job is created or updated.
+        git_sha: The git sha of the application for which the indexing job is created or updated.
         bucket_name: The name of the S3 bucket where the indexing job database is stored.
         use_https: Boolean flag indicating whether to use HTTPS for the database connection. Defaults to True.
         results: Optional results of the indexing job to be stored in the database. Defaults to None.
     """
     try:
-        print(f"Setting up index for app_name={app_name}...")
+        print(f"Setting up index for git_repo={git_repo}...")
 
         db = get_lancedb_connection(bucket_name, "indexing_jobs", use_https)
 
         data = [
-            {"app_name": app_name, "job_results": results},
+            {"git_repo": git_repo, "git_sha": git_sha, "job_results": results},
         ]
 
         print(f"Indexing job data: {data}")
@@ -141,7 +144,7 @@ def create_or_update_indexing_job(app_name: str,
         table = db.create_table("jobs", data=data, mode="create", exist_ok=True)
 
         (
-            table.merge_insert("app_name")
+            table.merge_insert("git_repo")
             .when_matched_update_all()
             .when_not_matched_insert_all()
             .execute(data)
@@ -150,19 +153,22 @@ def create_or_update_indexing_job(app_name: str,
         print("Indexing complete.")
 
     except Exception as e:
-        print(f"Error while creating/updating indexing job for {app_name}:"
+        print(f"Error while creating/updating indexing job for {git_repo}:"
               f": {e}")
 
         traceback.print_exc()
 
-def fetch_indexing_job(app_name: str,
+def fetch_indexing_job(git_repo: str,
                        bucket_name: str,
-                       use_https: bool = True):
+                       use_https: bool = True,
+                       git_sha: str = "master"):
     """
     Fetches an indexing job for a specified application name from the database.
 
     Args:
-        app_name: The name of the application for which the indexing job is being retrieved.
+        git_repo: The git repo of the application for which the indexing job is
+        being retrieved.
+        git_sha: The git sha of the application for which the indexing job is being retrieved.
         bucket_name: The name of the database bucket to connect to.
         use_https: Whether to use HTTPS for the database connection. Defaults to True.
     Returns:
@@ -173,12 +179,13 @@ def fetch_indexing_job(app_name: str,
         db = get_lancedb_connection(bucket_name, "indexing_jobs", use_https)
 
         data = [
-            {"app_name": app_name, "job_results": ""},
+            {"git_repo": git_repo, "job_results": ""},
         ]
 
         table = db.create_table("jobs", data=data, mode="create", exist_ok=True)
 
-        results = table.search().where(f"app_name = '{app_name}'").select(
+        results = table.search().where(f"git_repo = '{git_repo}' AND "
+                                       f"git_sha = '{git_sha}'").select(
             ["job_results"]).to_list()
 
         if results and "job_results" in results[0]:
@@ -188,7 +195,7 @@ def fetch_indexing_job(app_name: str,
             print("No results found")
 
     except Exception as e:
-        print(f"Error while fetching job for {app_name}:"
+        print(f"Error while fetching job for {git_repo}:"
               f": {e}")
 
         traceback.print_exc()
