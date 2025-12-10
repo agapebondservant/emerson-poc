@@ -116,7 +116,7 @@ def get_lancedb_connection(bucket_name: str,
 def create_or_update_indexing_job(git_repo: str,
                        bucket_name: str,
                        use_https: bool = True,
-                       results: str = None,
+                       results: str = "",
                        git_sha: str = "master"
                        ):
     """
