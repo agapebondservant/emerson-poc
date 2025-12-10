@@ -145,6 +145,8 @@ def create_or_update_indexing_job(app_name: str,
             .execute(data)
         )
 
+        print("Indexing complete.")
+
     except Exception as e:
         print(f"Error while creating/updating indexing job for {app_name}:"
               f": {e}")
@@ -174,7 +176,7 @@ def fetch_indexing_job(app_name: str,
 
         table = db.create_table("jobs", data=data, mode="create", exist_ok=True)
 
-        results = table.search().where(f"app_name = '{app_name}'").select(
+        results = table.query().where(f"app_name = '{app_name}'").select(
             "job_results").to_list()
 
         return results[0][0]
