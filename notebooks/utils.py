@@ -128,13 +128,15 @@ def create_or_update_indexing_job(app_name: str,
         results: Optional results of the indexing job to be stored in the database. Defaults to None.
     """
     try:
-        print(f"Setting up index for {app_name}...")
+        print(f"Setting up index for app_name={app_name}...")
 
         db = get_lancedb_connection(bucket_name, "indexing_jobs", use_https)
 
         data = [
             {"app_name": app_name, "job_results": results},
         ]
+
+        print(f"Indexing job data: {data}")
 
         table = db.create_table("jobs", data=data, mode="create", exist_ok=True)
 
@@ -265,7 +267,7 @@ def download_lancedb_index(bucket_name: str,
                 data_to_copy.to_parquet(
                     f"{local_lancedb_path}/output/{table_name}.parquet")
 
-        print("DB index initialization complete.")
+        print("DB index initialization complete...")
 
     except Exception as e:
 
