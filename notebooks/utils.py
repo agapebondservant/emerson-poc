@@ -179,7 +179,7 @@ def fetch_indexing_job(git_repo: str,
         db = get_lancedb_connection(bucket_name, "indexing_jobs", use_https)
 
         data = [
-            {"git_repo": git_repo, "job_results": ""},
+            {"git_repo": git_repo, "git_sha": git_sha, "job_results": ""},
         ]
 
         table = db.create_table("jobs", data=data, mode="create", exist_ok=True)
