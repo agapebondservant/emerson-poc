@@ -36,7 +36,7 @@ def postprocess_dataset(dataset_name: str,
     """
 
     def update_prompt_sample(sample):
-        sample["title"] = (f"{sample['summary_type']} for file path "
+        sample["code_item"] = (f"{sample['summary_type']} for file path "
                            f"[{sample['code_id']}]")
 
         sample["text"] = (f"File path: [{sample['code_id']}]\n"
@@ -44,26 +44,11 @@ def postprocess_dataset(dataset_name: str,
                            f"{sample['summary_type']}:\n{sample['summary']}\n")
         return sample
 
-    def add_metadata_for_sample(sample):
-        sample["title"] = f"File path [{sample['code_id']}]"
+    ds = load_dataset(dataset_name, split="train").map(update_prompt_sample)
 
-        sample["text"] = (f"File path: [{sample['code_id']}]\n"
-                          f"Code:\n{sample['code']}\n")
-        return sample
+    ds.to_json(generated_jsonl_file, orient="records", lines=True)
 
-    ds1 = load_dataset(dataset_name, split="train").map(update_prompt_sample)
-
-    ds2 = load_dataset(dataset_name, split="train").map(add_metadata_for_sample)
-
-    _, unique_indices = np.unique(ds2['title'], return_index=True)
-
-    ds2 = ds2.select(unique_indices.tolist())
-
-    combined = concatenate_datasets([ds1, ds2])
-
-    combined.to_json(generated_jsonl_file, orient="records", lines=True)
-
-    return combined
+    return ds
 
 def split_jsonl_into_json_files(source_file: str,
                                 target_dir: str):
