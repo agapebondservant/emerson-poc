@@ -34,10 +34,10 @@ def postprocess_dataset(dataset_name: str,
     """
 
     def update_prompt_sample(sample):
-        sample["title"] = (f"{sample['summary_type']} for file path "
+        sample["title"] = (f"{sample['summary_type']} for labeled file path "
                            f"'{sample['code_id']}'")
 
-        sample["text"] = (f"File path: '{sample['code_id']}'\n"
+        sample["text"] = (f"Labeled file path: '{sample['code_id']}'\n"
                           f"Code:\n{sample['code']}\n"
                            f"{sample['summary_type']}:\n{sample['summary']}\n")
         return sample
