@@ -36,12 +36,13 @@ def postprocess_dataset(dataset_name: str,
     """
 
     def update_prompt_sample(sample):
-        sample["code_item"] = (f"{sample['summary_type']} for file path "
+        sample["code_item"] = (f"{sample['summary_type'].replace('_', ' ').capitalize()} for file path "
                            f"'{sample['code_id']}'")
 
         sample["text"] = (f"File path: '{sample['code_id']}'\n"
                           f"Code:\n{sample['code']}\n"
-                           f"{sample['summary_type']}:\n{sample['summary']}\n")
+                           f"{sample['summary_type'].replace('_', ' ').capitalize()}:\
+                           n{sample['summary']}\n")
         return sample
 
     ds = load_dataset(dataset_name, split="train").map(update_prompt_sample)
