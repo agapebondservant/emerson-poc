@@ -412,9 +412,10 @@ def get_unique_app_name_for_repo(git_repo: str,
     try:
         db = get_lancedb_connection(bucket_name, "git_repos", use_https)
 
-        data = [
-            {"git_repo": git_repo, "git_sha": git_sha},
-        ]
+        data = pd.DataFrame([{
+            "git_repo": git_repo,
+            "git_sha": git_sha
+        }])
 
         table = db.create_table("git_repo_apps", data=data, mode="create",
                                 exist_ok=True)
