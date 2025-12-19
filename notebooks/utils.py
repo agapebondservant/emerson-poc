@@ -384,7 +384,7 @@ def register_unique_app_name_for_repo(git_repo: str,
 
         table.merge_insert(
             on="git_repo"
-        ).when_matched_then_update().when_not_matched_then_insert().execute(data)
+        ).when_matched_update_all().when_not_matched_insert_all().execute(data)
 
     except Exception as e:
         print(f"Error while registering app_name {app_name}, git_repo"
