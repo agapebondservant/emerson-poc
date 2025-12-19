@@ -27,6 +27,9 @@ import random
 
 import shutil
 
+############################################################################
+# Dataset Processing
+#############################################################################
 def postprocess_dataset(dataset_name: str,
                         generated_jsonl_file: str,
                         ):
@@ -56,6 +59,10 @@ def postprocess_dataset(dataset_name: str,
     ds.to_json(generated_jsonl_file, orient="records", lines=True)
 
     return ds
+
+############################################################################
+# File Processing
+#############################################################################
 
 def split_jsonl_into_json_files(source_file: str,
                                 target_dir: str):
@@ -91,6 +98,9 @@ def split_jsonl_into_json_files(source_file: str,
 
         traceback.print_exc()
 
+############################################################################
+# LanceDB Operations
+#############################################################################
 def get_lancedb_connection(bucket_name: str,
                                  lancedb_db_name: str,
                                  use_https: bool = True):
@@ -343,6 +353,88 @@ def query_lancedb_graphrag_index(prompt: str,
 
         traceback.print_exc()
 
+def register_unique_app_name_for_repo(git_repo: str,
+                                      app_name: str,
+                                      git_sha: str = "master",
+                                      bucket_name: str = "data",
+                                      use_https: bool = True):
+    """
+    Registers a unique application name for a given Git repository into a specified
+    database.
+    Args:
+        git_repo: Git repository URL or identifier to associate the app name with.
+        git_sha: Git commit SHA to associate with the app name. Defaults to "master".
+        app_name: Name of the application to be registered uniquely for the repository.
+        bucket_name: (Optional) Database bucket used to organize records.Defaults to "data".
+        use_https: (Optional) Indicates whether to use HTTPS for the database connection. Defaults to True.
+    """
+    try:
+        db = get_lancedb_connection(bucket_name, "git_repos", use_https)
+
+        data = [
+            {"git_repo": git_repo, "git_sha": git_sha, "app_name": app_name},
+        ]
+
+        table = db.create_table("git_repo_apps", data=data, mode="create",
+                                exist_ok=True)
+
+        table.merge_insert(
+            data=data,
+            on="git_repo"
+        ).when_matched_then_update().when_not_matched_then_insert().execute()
+
+    except Exception as e:
+        print(f"Error while registering app_name {app_name}, git_repo"
+              f" {git_repo}, git_sha {git_sha}:"
+              f": {e}")
+
+        traceback.print_exc()
+
+def get_unique_app_name_for_repo(git_repo: str,
+                                 git_sha: str = "master",
+                                 bucket_name: str = "data",
+                                 use_https: bool = True):
+    """
+    Generates or retrieves a unique application name for a given Git repository
+    and commit.
+    Args:
+        git_repo: The Git repository URL or identifier.
+        git_sha: The specific commit SHA to identify the repository state,default is "master".
+        bucket_name: The name of the bucket used for database connection,default is "data".
+        use_https: Specifies whether to use HTTPS for the connection,default is True.
+    Returns:
+        The unique application name associated with the given repository
+        and commit, or None of none is if found.
+    """
+    try:
+        db = get_lancedb_connection(bucket_name, "git_repos", use_https)
+
+        data = [
+            {"git_repo": git_repo, "git_sha": git_sha},
+        ]
+
+        table = db.create_table("git_repo_apps", data=data, mode="create",
+                                exist_ok=True)
+
+        results = table.search().where(f"git_repo = '{git_repo}' AND "
+                                       f"git_sha = '{git_sha}'").select(
+            ["app_name"]).to_list()
+
+        if results and "app_name" in results[0]:
+            return results[0]["app_name"]
+
+        else:
+            print("No results found")
+
+    except Exception as e:
+        print(f"Error while fetching job for {git_repo}:"
+              f": {e}")
+
+        traceback.print_exc()
+
+############################################################################
+# Github Processing
+#############################################################################
 def get_directory_structure(repo_path,
                             git_branch='master',
                             include_extensions=('.cfm', '.cfc', '.cfml','.java')):
