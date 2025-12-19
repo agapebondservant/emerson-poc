@@ -1,0 +1,54 @@
+code,prompt,baseline,candidate
+,Provide a clear and concise explanation of the purpose of the code.,"Golfap is a lightweight **Golf News & Tournament** web application.
+* Surfaces a daily feed of golf headlines and related metadata (links, summaries, categories).
+* Provides a tournament‑and‑player overview, allowing users to inspect individual player statistics per event.
+* Uses ColdFusion Markup Language (CFML) with a **JSON** utility component for serializing query‑result sets to JSON for client‑side consumption.
+Altogether the code collects, formats, and presents golf news, tournament leaderboards, and golfer performance data to a web browser.","Golfap is a social golf score‑keeping web application that lets users track scores, place bets, and manage games with friends.  It presents news feeds, leaderboards, and PGA‑tour tournament data, and it uses ColdFusion pages rendered from Markdown templates.  The application serialises data to JSON for AJAX calls, validates input, and integrates Google AdSense and Google Analytics for monetisation and tracking.  The code base is organised into a *news* module, a *pgatour* module, and a shared *tabs* component.  The application relies on a ColdFusion datasource named **GOLFAP** to query tournament, player, news, and score data.  The code is valid ColdFusion/Markdown and follows a typical MVC pattern with reusable templates and custom helper functions.  [Data: Reports (73, 173, 117, 175, 80)]
+"
+,What are the client-side frameworks used by the code?,"Prototype, Scriptaculous and a minimal portal widget framework","Prototype.js, Effects, Builder, DragDrop, Portal, Firebug, and custom JavaScript for dynamic UI updates."
+news/tabs.cfm,What is the responsibility of `news/tabs.cfm` in the code?,”Navigation bar and header layout for both news and tournament sites.”,reusable tab navigation component.
+news/header.cfm,What is the responsibility of `news/header.cfm` in the code?,”Includes CSS and `tabs.cfm`; used by most pages.”,"reusable header markup, includes `OBJECT PAGE_TRACKER` for analytics.  "
+news/index.cfm,What is the responsibility of `news/index.cfm` in the code?,"”Home page for the news site; displays ads, date, and a widget container.",landing page for the news section.
+news/leaderboards.cfm,What is the responsibility of `news/leaderboards.cfm` in the code?,”Leaderboard table for the tournaments site; displays a table of tournaments and  leaderboard placeholders.”,enders global leaderboard tables.
+news/page.cfm,What is the responsibility of `news/page.cfm` in the code?,”Repeated content used across news pages.”,"wrapper page for news content, includes `PAGE_TRACKER` and `ANALYTICSTRACKER`"
+news/getNews.cfm,What is the responsibility of `news/getNews.cfm` in the code?,"”Retrieves real news data from the database, formats it to an array of structures, JSON‑encodes it, and outputs the result.""",retrieves news items via `QGETNEWS_QUERY`
+news/getNews_mock.cfm,What is the responsibility of `news/getNews_mock.cfm` in the code?,”Same as `getNews.cfm` but with a static mock query for testing.”,provides mock news data for testing.
+news/add_users.cfm,What is the responsibility of `news/add_users.cfm` in the code?,”Demo forms showing how to collect user logins and client‑side validation (Prototype).”,handles user registration and group creation.
+news/debug.cfm,What is the responsibility of `news/debug.cfm` in the code?,”Prototype‑based widget demo layout.”,debugging utilities for the news module.
+pgatour/index.cfm,What is the responsibility of `pgatour/index.cfm` in the code?,”Redirects to the tournaments subsection.”,landing page for PGA‑tour data
+pgatour/tournaments/header.cfm,What is the responsibility of `pgatour/tournaments/header.cfm` in the code?, “Header and navigation bar specific to the tournaments section.”,"reusable header markup, includes `OBJECT PAGE_TRACKER` for analytics."
+pgatour/tournaments/index.cfm,What is the responsibility of `pgatour/tournaments/index.cfm` in the code?,”Main page for selecting a tournament; populates a `<select>` and loads results via Ajax.”,main tournament listing page.
+pgatour/tournaments/m_qtournaments.cfm,What is the responsibility of `pgatour/tournaments/m_qtournaments.cfm` in the code?,”Query for distinct tournament list used by the index page.”,query helper for quick tournament data (`QTournaments`)
+pgatour/tournaments/ajax_getTourney.cfm,What is the responsibility of `pgatour/tournaments/ajax_getTourney.cfm` in the code?,”Server‑side script that returns a tournament leaderboard table in HTML.”,AJAX endpoint returning tournament details in JSON.
+pgatour/tournaments/ajax_getPlayerData.cfm,What is the responsibility of `pgatour/tournaments/ajax_getPlayerData.cfm` in the code?,”Server‑side script that returns player history for a selected golfer.”,AJAX endpoint returning player statistics in JSON.
+pgatour/tournaments/players.cfm,What is the responsibility of `pgatour/tournaments/players.cfm`  in the code?,“Dropdown for selecting a golfer; loads individual golfer history via Ajax.”,displays player profiles and statistics.
+pgatour/tournaments/getNews.cfm,What is the responsibility of `pgatour/tournaments/getNews.cfm` in the code?,“Provides news data for the tournaments sub‑site.”,retrieves news specific to tournaments.
+pgatour/tournaments/tabs.cfm,What is the responsibility of `pgatour/tournaments/tabs.cfm` in the code?,“Alternative navigation tab bar for the tournaments section.”,tab navigation for tournament pages.
+news/json.cfc,What is the responsibility of `json.cfc` in the code?," “Provides `encode`, `decode`, and schema `validate` utilities for JSON.""",provides `jsonEncode()` and `jsonDecode()`.
+,Provide a concise outline of the conceptual domain model associated with this code. Include the current state of the domain objects based on information extracted from the code.,"- **User / Login** – Represents a user login; mock logic in `encode.cfm`/`encode2.cfm`.
+- **Group** – A collection of users; created in `encode.cfm`.
+- **News Feed** – External RSS/Atom feeds providing golf news.
+- **Story** – Individual news item with title, link, summary; table `tStories`.
+- **Category** – Classification of stories (e.g., tournament, travel); table `tCategories`.
+- **Tournament** – A golf event; joined data from `events`, `event_names`, `golfer_history`.
+- **Golfer** – Player with first and last name; table `golfer`.
+- **GolferHistory** – Performance records for a golfer in a specific tournament; table `golfer_history`.  ","- **User** – represents a golfer or fan who can log in, track scores, place bets, and view news.
+- **Player** – a golfer whose personal and performance data is stored in the `GOLFER` table and displayed via `pgatour/tournaments/players.md`.
+- **Tournament** – an event defined in the `EVENTS` and `EVENT_NAMES` tables; accessed through `QTournaments` and displayed in `pgatour/tournaments/index.md`.
+- **NewsArticle** – a news item stored in the `NEWS` table; retrieved by `QGETNEWS_QUERY` and rendered in `news/getNews.md`.
+- **LeaderboardEntry** – aggregates a player's score for a tournament; displayed in `news/leaderboards.md`.
+- **Bet** – a wager between users on a tournament outcome; implied by the application description but not explicitly modelled in the current code.
+- **Game** – a collection of scores and bets for a session; implied by the application description but not explicitly modelled.
+
+The current state of the domain objects is that **Users** are created via `add_users.md`, **Players** and **Tournaments** are queried from the database and presented through AJAX endpoints, **NewsArticles** are fetched and displayed in the news section, and **LeaderboardEntries** are rendered from query results.  Bets and Games are not yet persisted in the code base.  "
+,What kind of database is used for this application?,MySQL,MySQL
+,What is the purpose of the golfer table in the database?,golfer master record,stores golfer personal data.
+,What is the purpose of the tFeeds table in the database?,feeds metadata.,stores news feed data.
+,What is the purpose of the tCategories table in the database?,category lookup.,stores news categories.
+,What is the purpose of the tStories table in the database?,stored news stories.,stores news story data.
+,What is the purpose of the golfer_history table in the database?,performance histories.,stores historical scores per golfer.
+,What is the purpose of the events table in the database?,tournament event data. ,stores tournament event records.
+,What is the purpose of the event_names table in the database?,human‑readable event names.,maps event IDs to human‑readable names.
+,What are the AJAX endpoints used in the application?,- ajax_getPlayerData.cfm,"- ajax_getPlayerData.md
+- ajax_getTourney.md"
+,What is the entrypoint of the application?,,
