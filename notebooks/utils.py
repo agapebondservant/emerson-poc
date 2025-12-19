@@ -21,6 +21,12 @@ from minio.error import S3Error
 
 from datasets import load_dataset, Dataset, concatenate_datasets
 
+import git
+
+import random
+
+import shutil
+
 def postprocess_dataset(dataset_name: str,
                         generated_jsonl_file: str,
                         ):
@@ -336,3 +342,67 @@ def query_lancedb_graphrag_index(prompt: str,
         print(f"Error: {e}")
 
         traceback.print_exc()
+
+def get_directory_structure(repo_path,
+                            git_branch='master',
+                            include_extensions=('.cfm', '.cfc', '.cfml','.java')):
+    """
+    Constructs the directory structure representation
+    of the code in this git repository.
+    The output is formatted as follows:
+    ---Dir 1
+    ------File 1
+    ------File 2
+    ---Dir 2
+    ------File 3
+    (...etc...)
+
+    Args:
+        repo_path: The path to the Git repository containing the indexed code.
+        git_branch: The branch of the Git repository to be used for indexing. Defaults to 'master'.
+        include_extensions: A tuple of file extensions to be included in the directory structure.
+    """
+    tmpdir = f"tmp{random.randint(1, 1000)}"
+
+    try:
+
+        os.makedirs(tmpdir, exist_ok=True)
+
+        repo = git.Repo.clone_from(repo_path, tmpdir, branch=git_branch)
+
+        tree = repo.tree()
+
+        paths = []
+
+        print(f"Repository: {repo.working_tree_dir}\n")
+
+        for item in tree.traverse():
+
+            if (item.type == 'blob' and os.path.splitext(item.path)[1] in
+                    include_extensions):
+                paths.append(item.path)
+
+        paths, visited, directory_structure = sorted(paths), [], []
+
+        for path in paths:
+
+            splits = path.split("/")
+
+            for i in range(1, len(splits) + 1):
+
+                prefix, subpath = splits[:i], splits[i - 1]
+
+                if prefix not in visited:
+                    visited.append(prefix)
+
+                    directory_structure.append("---" * i + subpath)
+
+        return "\n".join(directory_structure)
+
+    except Exception as e:
+
+        traceback.print_exc()
+
+    finally:
+
+        shutil.rmtree(tmpdir)
