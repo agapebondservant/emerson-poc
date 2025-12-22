@@ -11,7 +11,7 @@ Contents
   - Set up custom ServingRuntime
   - Deploy Granite 4 Tiny with Tool Calling
   - Set up Minio for Object Storage (for **LanceDB with GraphRAG**, **Kubeflow Pipeline Server**)
-  - Set up n8n
+  - Set up Kubeflow Pipelines
   - Set up LanceDB MCP Server
   - Set up Llama Stack
 - Synthetic Data Generation with sdg_hub
@@ -22,6 +22,7 @@ Contents
   - Demonstration with continue.dev
   - Demonstration with n8n
   - Demonstration with multi-agentic app
+- How-Tos
 
 ## 0. PREPARE ENVIRONMENT VARIABLES
 Update .env.template as appropriate and rename to .env, then run
@@ -81,7 +82,7 @@ export VLLM_ALLOW_LONG_MAX_MODEL_LEN=1
 python -m vllm.entrypoints.openai.api_server \
 --model=granite-4-tiny-version-1 \
 --dtype=bfloat16 \
---max-model-len=8192 \
+--max-model-len=128000 \
 --trust-remote-code \
 --gpu-memory-utilization=0.9 \
 --tool-call-parser=hermes \
@@ -110,24 +111,21 @@ echo AWS_S3_ENDPOINT=$AWS_S3_ENDPOINT >> .env
 echo AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID >> .env
 echo AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY >> .env
 ```
-### 1.7. Deploy n8n
+### 1.7. Deploy Kubeflow Pipelines
 ```
 source .env
-sudo dnf install container-tools
-oc new-project n8n
-oc create secret docker-registry quay-creds --docker-server=quay.io --docker-username=${DOCKER_USERNAME}${DOCKER_USERNAME_SUFFIX} --docker-password=${DOCKER_PASSWORD} --docker-email=${DOCKER_EMAIL}
-oc new-build --name=n8n-custom --to="quay.io/oawofolurh/n8n:latest" --strategy=docker --push-secret quay-creds --binary
-oc start-build n8n-custom --from-dir docker --follow
-
-# Run the following to install N8N:
-oc new-project n8n
-helm repo add community-charts https://community-charts.github.io/helm-charts
-helm repo update
-oc apply -f resources/n8n/pvc.yaml -n n8n
-oc apply -f resources/n8n/deployment.yaml -n n8n
-oc adm policy add-scc-to-user anyuid -z n8n-workflows
-oc expose svc n8n-workflows -n n8n
-# Access the N8N UI: echo http://`oc get route -o json | jq -r '.items[0].spec.host'`
+podman login -u ${DOCKER_USERNAME}${DOCKER_USERNAME_SUFFIX} -p ${DOCKER_PASSWORD} ${DOCKER_HOST}
+podman pull quay.io/oawofolurh/graphrag-wb:latest
+podman pull quay.io/oawofolurh/agentic-wb:latest
+podman login -u $(oc whoami) -p $(oc whoami -t) image-registry.openshift-image-registry.svc:5000
+podman tag quay.io/oawofolurh/graphrag-wb:latest image-registry.openshift-image-registry.svc:5000/oawofolurh/graphrag-wb:latest
+podman tag quay.io/oawofolurh/graphrag-wb:latest image-registry.openshift-image-registry.svc:5000/oawofolurh/agentic-wb:latest
+podman push image-registry.openshift-image-registry.svc:5000/oawofolurh/graphrag-wb:latest
+podman push image-registry.openshift-image-registry.svc:5000/oawofolurh/agentic-wb:latest
+python -m venv venv
+source venv/bin/activate
+pip install kfp==1.8.21 pyyaml==5.3.1 dotenv==0.9.9
+python3 pipelines/kfp_pipeline.py
 ```
 
 ### 1.8. Set up LanceDB MCP Server
@@ -173,3 +171,26 @@ podman run -d -p 8080:8080 -p 8443:8443 -v $(pwd):/app --name cf_golfap ortussol
 ### 4.3. Demonstration with n8n
 
 ### 4.4. Demonstration with multi-agentic app
+To run the app locally:
+  1. Set up a virtual environment: python3.12 -m venv venv 
+  2. Activate the virtual environment: source venv/bin/activate
+  3. cd to the app directory: cd apps/code-translator
+  4. Update .env.template as appropriate and rename to .env
+  5. Install dependencies: pip install -r requirements.txt 
+  6. Start the app: python3 -m streamlit run app.py
+
+### 4.5. Demonstration with Kubeflow Pipelines
+
+## 5. How-Tos (can convert to MCP servers)
+
+### Get Size of LanceDB index
+Run the following:
+```
+mc du cfdemo/data
+```
+
+### Generate Text Dump of git repository
+Run the following:
+```
+gitingest <gitrepo> --include-pattern "**/*.cfm,**/*.cfc,**/*.cfml,**/*.java"
+```

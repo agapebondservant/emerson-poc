@@ -1,5 +1,12 @@
 .env
-apps/
+apps/cf_golfap
+apps/Checkmate-CMS
+apps/demo
+apps/HelloWorld
+apps/shopping-cart
+apps/demo.sh
+apps/demo.sql
+apps/README.md
 scratch/
 old/
 secret.yaml
@@ -8,3 +15,6 @@ repomix/
 dcgm-exporter-dashboard.json
 wb-secret.yaml
 notebooks/settings.yaml
+gitingests/
+apps/code-translator/__pycache__
+apps/code-translator/agentic/__pycache__
