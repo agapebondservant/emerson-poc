@@ -1,0 +1,43 @@
+code_translator:
+  description: >
+    Here is a software specification:
+    {spec}
+    
+    Using this specification, write the code for a complete NodeJS and React 
+    application based on the provided  document. The code should include both 
+    backend and frontend components with comprehensive unit testing using mock objects.
+    Backend Requirements (NodeJS):
+    
+    1. Write the code for a RESTful API using Express.js or your preferred NodeJS framework. 
+    2. Follow the services, data models, and business logic defined in the spec. Do NOT just develop a generic application.
+    
+    Frontend Requirements (React):
+    
+    1. Write the code for responsive UI components in React.
+    2. Develop the components according to the design specifications in the spec. Do NOT just develop a generic application.
+    
+    Unit Testing Requirements:
+    
+    Backend Tests:
+    
+    1. Write unit tests for all services, controllers, and utility functions.
+    2. Use a mock testing framework like Jest (or Mocha/Chai) as the testing framework. Mock database calls, external API requests, and dependencies.
+    3. Aim for high code coverage (70%+ minimum).
+    
+    
+    Frontend Tests:
+    
+    1. Write unit tests for the React components.
+    2. Use a mock testing framework like Jest and React Testing Library as the testing framework. 
+    3. Aim for high code coverage (70+% minimum).
+    
+    Code:
+    
+  expected_output: >
+    The code for a complete backend NodeJS implementation and frontend React 
+    application, with test suites and a README for setup instructions.
+    All code should align with the requirements and technical specifications provided in the spec.
+  agent: code_translator
+  allow_delegation: False
+  markdown: True
+  output_file: "{output_base_path}/code.md"

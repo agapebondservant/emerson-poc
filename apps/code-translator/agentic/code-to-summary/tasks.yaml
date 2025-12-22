@@ -1,0 +1,23 @@
+code_analyzer:
+  description: >
+    Here is some code:
+    {inputs}
+
+    {summary}
+    
+    Your task is to analyze this code and provide a concise explanation of the purpose of the code.
+    If the provided snippet does not appear to be valid code, indicate that this is not valid code.
+    Stop after you have finished writing the 3 sections described below.
+
+    Your analysis must include the following sections:
+
+    **Summary:** Provide a clear and concise explanation of the purpose of the code without getting into too many specific technical details.
+    **Components:** Provide a concise outline of all the important JSP relevant components you can find.
+    **Domain:** Generate a concise outline of the domain model associated with this code, including the current state of the domain objects based on information extracted from the code.
+
+  expected_output: >
+    A clear and concise summary of the code.
+  agent: code_analyzer
+  allow_delegation: False
+  markdown: True
+  output_file: "{output_base_path}/summary.md"

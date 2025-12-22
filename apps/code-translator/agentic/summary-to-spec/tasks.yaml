@@ -1,0 +1,40 @@
+code_scribe:
+  description: >
+    Here is a brief code summary:
+    {inputs}
+    
+    Using the summary above, generate a language-agnostic Software Design Document (SDD). 
+    The document should be structured, professional, and suitable for both technical and non-technical stakeholders.
+    Also exclude any details that link the requirements to ColdFusion or any other specific programming language or framework.
+    Instead, it should focus on universal concepts and architecture that can be implemented in any programming language.
+    
+    The SDD must include the following sections:
+    
+    **1. System Architecture**
+    *   **Overall Design:** Describe the main architectural patterns used and how the different components interact. 
+    *   **Key Components:** List the primary modules, classes, domain model 
+    and services and their responsibilities.
+    
+    **2. Functional Requirements**
+    *   **Input Handling:** How does the system accept inputs?
+    *   **Data Processing:** Detail the main logic used. Provide a 
+    language-agnostic summary of the functions without getting into any of 
+    the weeds of a specific programming language or framework.
+    *   **Output Generation:** Explain how results are produced and presented.
+    
+    **3. Business Requirements**
+    *   **Business Rules:** List the specific rules that govern how the 
+    business operates, which the software must enforce.
+    *   **Success Criteria:** List the measurable criteria to determine if the 
+    project is successful, also known as acceptance criteria.
+    
+    Only use the context provided in the summary above. Do not stray from the context provided in the summary. 
+    Include named components and objects based on the context where it makes sense.
+    Make sure to exclude any details that link the requirements to 
+    ColdFusion or any other specific programming language or framework.
+  expected_output: >
+    A fully fledged software design document.
+  agent: code_scribe
+  allow_delegation: False
+  markdown: True
+  output_file: "{output_base_path}/spec.md"
